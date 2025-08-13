@@ -9,50 +9,74 @@
     <style>
         * {margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;}
         body{background-color:#f8f9fa;color:#212529;line-height:1.6;overflow-x:hidden;}
+        
         header{background:linear-gradient(135deg,#1a1a1a 0%,#000 100%);color:white;text-align:center;padding:1.8rem 0;box-shadow:0 4px 12px rgba(0,0,0,0.1);position:sticky;top:0;z-index:100;}
         .header-content{max-width:1200px;margin:0 auto;padding:0 1rem;}
-        h1{font-size:2.2rem;letter-spacing:1.5px;margin-bottom:0.5rem;font-weight:700;}
-        .subtitle{font-size:1.1rem;opacity:.85;font-weight:300;max-width:600px;margin:0 auto;}
+        h1{font-size:1.7rem;letter-spacing:1px;margin-bottom:0.5rem;font-weight:700;}
+        .subtitle{font-size:0.95rem;opacity:.85;font-weight:300;max-width:600px;margin:0 auto;}
+        
         .controls{display:flex;justify-content:center;gap:1rem;margin-top:1.5rem;flex-wrap:wrap;}
         .search-container{position:relative;max-width:400px;width:100%;}
         .search-container input{width:100%;padding:0.8rem 1.2rem;padding-left:3rem;border-radius:50px;border:1px solid #ddd;font-size:1rem;background-color:white;box-shadow:0 2px 8px rgba(0,0,0,0.1);}
         .search-container i{position:absolute;left:1.2rem;top:50%;transform:translateY(-50%);color:#777;}
-        .gallery-container{max-width:1400px;margin:2rem auto;padding:0 1rem;}
-        .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1.2rem;}
-        .gallery-item{background:white;border-radius:10px;overflow:hidden;box-shadow:0 4px 15px rgba(0,0,0,0.08);transition:transform 0.3s ease,box-shadow 0.3s ease;display:flex;flex-direction:column;height:100%;}
-        .gallery-item:hover{transform:translateY(-5px);box-shadow:0 6px 20px rgba(0,0,0,0.12);}
-        .image-container{position:relative;width:100%;padding-top:100%;overflow:hidden;background:linear-gradient(45deg,#f0f0f0,#e0e0e0);}
+        
+        .gallery-container{max-width:1400px;margin:1.5rem auto;padding:0 1rem;}
+        
+        /* GALERÍA MEJORADA PARA MOBILE */
+        .gallery{display:grid;grid-template-columns:repeat(2, 1fr);gap:0.8rem;}
+        .gallery-item{background:white;border-radius:10px;overflow:hidden;box-shadow:0 3px 10px rgba(0,0,0,0.05);transition:all 0.3s ease;display:flex;flex-direction:column;}
+        .gallery-item:active{transform:scale(0.98);}
+        
+        .image-container{position:relative;width:100%;padding-top:100%;overflow:hidden;background:linear-gradient(45deg,#f5f5f5,#eaeaea);}
         .gallery-image{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;transition:transform 0.5s ease;}
-        .gallery-image:hover{transform:scale(1.05);}
-        .gallery-info{padding:1rem;}
-        .user-name{font-weight:700;font-size:1.1rem;margin-bottom:0.5rem;color:#1a1a1a;display:flex;align-items:center;gap:0.5rem;}
-        .user-name i{color:#555;}
-        .message-preview{font-size:0.9rem;color:#555;cursor:pointer;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;position:relative;padding:0.5rem 0;}
-        .message-preview:hover{color:#000;}
-        .modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.92);align-items:center;justify-content:center;flex-direction:column;padding:1rem;}
-        .modal-content{max-width:90%;max-height:75vh;object-fit:contain;border-radius:8px;box-shadow:0 10px 30px rgba(0,0,0,0.3);}
-        .modal-message{color:white;text-align:center;margin-top:1.5rem;max-width:90%;font-size:1.2rem;padding:1rem;background:rgba(30,30,30,0.7);border-radius:8px;line-height:1.8;}
-        .close-modal{position:absolute;top:25px;right:25px;color:white;font-size:2.5rem;cursor:pointer;background:rgba(0,0,0,0.4);width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:1001;transition:all 0.3s;}
+        
+        .gallery-info{padding:0.8rem;}
+        .user-name{font-weight:600;font-size:0.95rem;margin-bottom:0.4rem;color:#1a1a1a;display:flex;align-items:center;gap:0.4rem;}
+        .user-name i{color:#777;font-size:0.9rem;}
+        .message-preview{font-size:0.85rem;color:#666;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;position:relative;padding:0.3rem 0;line-height:1.4;}
+        .message-preview::after{content: "Toca para ver más";display:block;font-size:0.75rem;color:#999;margin-top:0.3rem;font-style:italic;}
+        
+        .stats{text-align:center;margin:1.5rem 0;color:#666;font-size:1rem;}
+        
+        /* MODAL MEJORADO PARA MOBILE */
+        .modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.96);align-items:center;justify-content:center;flex-direction:column;padding:1rem;}
+        .modal-content{max-width:95%;max-height:60vh;object-fit:contain;border-radius:8px;box-shadow:0 10px 30px rgba(0,0,0,0.3);}
+        .modal-message{color:white;text-align:center;margin-top:1.2rem;max-width:95%;font-size:1.1rem;padding:1rem;background:rgba(30,30,30,0.7);border-radius:8px;line-height:1.6;}
+        .close-modal{position:absolute;top:15px;right:15px;color:white;font-size:2rem;cursor:pointer;background:rgba(0,0,0,0.4);width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:1001;transition:all 0.3s;}
         .close-modal:hover{background:rgba(200,0,0,0.7);transform:rotate(90deg);}
+        
         .loading{text-align:center;padding:3rem;font-size:1.3rem;color:#555;display:flex;flex-direction:column;align-items:center;}
         .loading i{font-size:2rem;margin-bottom:1rem;color:#333;animation:spin 1.5s linear infinite;}
         @keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
-        .stats{text-align:center;margin:1.5rem 0;color:#666;font-size:1.1rem;}
-        .error-message{grid-column:1 / -1;text-align:center;padding:2rem;background:#fff8f8;border:1px solid #ffcccc;border-radius:8px;color:#d9534f;margin:1rem;}
-        footer{text-align:center;padding:2rem;background:#1a1a1a;color:#ddd;margin-top:2rem;}
+        
+        .error-message{grid-column:1 / -1;text-align:center;padding:1.5rem;background:#fff8f8;border:1px solid #ffcccc;border-radius:8px;color:#d9534f;margin:1rem;}
+        
+        footer{text-align:center;padding:1.5rem;background:#1a1a1a;color:#ddd;margin-top:2rem;}
         .footer-content{max-width:1200px;margin:0 auto;}
-        .footer-logo{font-size:1.5rem;font-weight:bold;margin-bottom:1rem;color:white;}
+        .footer-logo{font-size:1.3rem;font-weight:bold;margin-bottom:0.8rem;color:white;}
         .footer-logo span{color:#ff6b6b;}
-        .social-links{display:flex;justify-content:center;gap:1.5rem;margin:1.5rem 0;}
-        .social-links a{color:#bbb;font-size:1.8rem;transition:color 0.3s;}
-        .social-links a:hover{color:white;}
-        .copyright{font-size:0.9rem;opacity:0.7;}
+        .social-links{display:flex;justify-content:center;gap:1.2rem;margin:1.2rem 0;}
+        .social-links a{color:#bbb;font-size:1.5rem;transition:color 0.3s;}
+        .copyright{font-size:0.85rem;opacity:0.7;margin-top:0.5rem;}
+        
+        /* MEJORAS PARA TABLET Y DESKTOP */
+        @media (min-width: 768px) {
+            h1{font-size:2rem;}
+            .subtitle{font-size:1.05rem;}
+            .gallery{grid-template-columns:repeat(3, 1fr);gap:1rem;}
+            .gallery-item{box-shadow:0 4px 12px rgba(0,0,0,0.07);}
+            .modal-content{max-height:70vh;}
+        }
+        
+        @media (min-width: 1024px) {
+            .gallery{grid-template-columns:repeat(4, 1fr);}
+        }
     </style>
 </head>
 <body>
 <header>
     <div class="header-content">
-        <h1>FOTOS PARA SOPRESA DE INVITADOS</h1>
+        <h1>FOTOS PARA SOPRESA PARA INVITADOS</h1>
         <p class="subtitle">Una colección especial de momentos compartidos por nuestros invitados</p>
         <div class="controls">
             <div class="search-container">
@@ -95,6 +119,7 @@
 </footer>
 
 <script>
+    // Inserta aquí tus credenciales de Supabase
     const SUPABASE_URL = 'https://cskqlyauszpgjvwgenth.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNza3FseWF1c3pwZ2p2d2dlbnRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2MTY4ODMsImV4cCI6MjA3MDE5Mjg4M30.HAZEfpAH2AZzoDBmsUOe3O33oAFbcRIJksZLOyeRvPk';
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -164,62 +189,63 @@
     }
 
     function createGalleryItem(item) {
-    const galleryItem = document.createElement('div');
-    galleryItem.className = 'gallery-item';
-
-    const imageContainer = document.createElement('div');
-    imageContainer.className = 'image-container';
-
-    const img = document.createElement('img');
-    img.className = 'gallery-image';
-    img.loading = 'lazy';
-
-    // Usar la URL tal cual está en la base de datos
-    img.src = item.imagen_url;
-    img.alt = `Imagen de ${item.nombre}`;
-
-    img.onerror = function () {
-        this.onerror = null;
-        this.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200"><rect width="300" height="200" fill="#f0f0f0"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#888" font-size="16">Imagen no disponible</text></svg>';
-    };
-
-    const infoDiv = document.createElement('div');
-    infoDiv.className = 'gallery-info';
-
-    const userName = document.createElement('div');
-    userName.className = 'user-name';
-    userName.innerHTML = `<i class="fas fa-user"></i> ${item.nombre || 'Anónimo'}`;
-
-    const messagePreview = document.createElement('div');
-    messagePreview.className = 'message-preview';
-    messagePreview.textContent = item.mensaje || 'Sin mensaje';
-
-    img.addEventListener('click', () => {
-        modalImage.src = img.src;
-        modalMessage.textContent = item.mensaje || '';
-        imageModal.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-    });
-
-    imageContainer.appendChild(img);
-    infoDiv.appendChild(userName);
-    infoDiv.appendChild(messagePreview);
-    galleryItem.appendChild(imageContainer);
-    galleryItem.appendChild(infoDiv);
-    gallery.appendChild(galleryItem);
-}
-
-
-    window.addEventListener('scroll', () => {
-        if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500 && !isLoading && !allDataLoaded) {
-            loadImages();
-        }
-    });
+        const galleryItem = document.createElement('div');
+        galleryItem.className = 'gallery-item';
+        
+        const imageContainer = document.createElement('div');
+        imageContainer.className = 'image-container';
+        
+        const img = document.createElement('img');
+        img.className = 'gallery-image';
+        img.loading = 'lazy';
+        img.src = item.imagen_url;
+        img.alt = `Imagen de ${item.nombre}`;
+        
+        img.onerror = function () {
+            this.onerror = null;
+            this.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200"><rect width="300" height="200" fill="#f0f0f0"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#888" font-size="16">Imagen no disponible</text></svg>';
+        };
+        
+        const infoDiv = document.createElement('div');
+        infoDiv.className = 'gallery-info';
+        
+        const userName = document.createElement('div');
+        userName.className = 'user-name';
+        userName.innerHTML = `<i class="fas fa-user"></i> ${item.nombre || 'Anónimo'}`;
+        
+        const messagePreview = document.createElement('div');
+        messagePreview.className = 'message-preview';
+        messagePreview.textContent = item.mensaje || '';
+        
+        // Evento para abrir el modal al tocar cualquier parte del elemento
+        const openModal = () => {
+            modalImage.src = img.src;
+            modalMessage.textContent = item.mensaje || '';
+            imageModal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        };
+        
+        galleryItem.addEventListener('click', openModal);
+        
+        imageContainer.appendChild(img);
+        infoDiv.appendChild(userName);
+        infoDiv.appendChild(messagePreview);
+        galleryItem.appendChild(imageContainer);
+        galleryItem.appendChild(infoDiv);
+        gallery.appendChild(galleryItem);
+    }
 
     function closeModal() {
         imageModal.style.display = 'none';
         document.body.style.overflow = 'auto';
     }
+
+    // Cerrar modal al tocar fuera de la imagen
+    imageModal.addEventListener('click', (e) => {
+        if (e.target === imageModal) {
+            closeModal();
+        }
+    });
 
     searchInput.addEventListener('input', () => {
         const searchTerm = searchInput.value.trim();
@@ -231,6 +257,14 @@
     window.addEventListener('DOMContentLoaded', () => {
         loadImages();
     });
+
+    // Cargar más imágenes al hacer scroll
+    window.addEventListener('scroll', () => {
+        if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500 && !isLoading && !allDataLoaded) {
+            loadImages();
+        }
+    });
 </script>
 </body>
 </html>
+
