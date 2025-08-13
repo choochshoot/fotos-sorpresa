@@ -9,6 +9,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://unpkg.com/@supabase/supabase-js"></script>
+    <!-- Librería para decodificar HEIC -->
+    <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.3/dist/heic2any.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -383,6 +385,19 @@
             0% { background-color: #f0f0f0; }
             100% { background-color: #e0e0e0; }
         }
+        
+        /* Indicador de formato HEIC */
+        .heic-badge {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            z-index: 10;
+        }
     </style>
 </head>
 <body>
@@ -458,26 +473,69 @@
     let imagesData = [];
     let searchTimeout = null;
 
+    // Función para convertir imágenes HEIC a JPEG
+    async function convertHeicToJpeg(heicUrl) {
+        try {
+            // Obtener la imagen HEIC como blob
+            const response = await fetch(heicUrl);
+            if (!response.ok) throw new Error('Error al obtener imagen HEIC');
+            
+            const blob = await response.blob();
+            
+            // Convertir HEIC a JPEG usando heic2any
+            const jpegBlob = await heic2any({
+                blob: blob,
+                toType: 'image/jpeg',
+                quality: 0.8 // Calidad del JPEG
+            });
+            
+            // Crear URL para el blob convertido
+            return URL.createObjectURL(jpegBlob);
+        } catch (error) {
+            console.error('Error al convertir HEIC a JPEG:', error);
+            return heicUrl; // Devuelve la URL original en caso de error
+        }
+    }
+
+    // Función para detectar si una URL es HEIC
+    function isHeic(url) {
+        return url.toLowerCase().endsWith('.heic');
+    }
+
     // Observer para lazy loading
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 const img = entry.target;
                 const src = img.dataset.src;
+                const isHeicImage = isHeic(src);
                 
-                // Cargar imagen solo cuando está visible
-                const tempImg = new Image();
-                tempImg.src = src;
-                tempImg.onload = () => {
-                    img.src = src;
-                    img.classList.add('loaded');
-                    img.onerror = null;
-                };
-                
-                tempImg.onerror = () => {
-                    img.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200"><rect width="300" height="200" fill="#f0f0f0"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#888" font-size="16">Imagen no disponible</text></svg>';
-                    img.classList.add('loaded');
-                };
+                if (isHeicImage) {
+                    // Convertir HEIC a JPEG
+                    convertHeicToJpeg(src).then(jpegUrl => {
+                        img.src = jpegUrl;
+                        img.classList.add('loaded');
+                        img.onerror = null;
+                    }).catch(error => {
+                        console.error('Error cargando imagen HEIC:', error);
+                        img.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200"><rect width="300" height="200" fill="#f0f0f0"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#888" font-size="16">Imagen no disponible</text></svg>';
+                        img.classList.add('loaded');
+                    });
+                } else {
+                    // Carga normal
+                    const tempImg = new Image();
+                    tempImg.src = src;
+                    tempImg.onload = () => {
+                        img.src = src;
+                        img.classList.add('loaded');
+                        img.onerror = null;
+                    };
+                    
+                    tempImg.onerror = () => {
+                        img.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200"><rect width="300" height="200" fill="#f0f0f0"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#888" font-size="16">Imagen no disponible</text></svg>';
+                        img.classList.add('loaded');
+                    };
+                }
                 
                 observer.unobserve(img);
             }
@@ -565,6 +623,14 @@
         img.dataset.src = item.imagen_url; // Usamos data-src para lazy loading
         img.alt = `Imagen de ${item.nombre}`;
         
+        // Añadir indicador HEIC si es necesario
+        if (isHeic(item.imagen_url)) {
+            const heicBadge = document.createElement('div');
+            heicBadge.className = 'heic-badge';
+            heicBadge.textContent = 'HEIC';
+            imageContainer.appendChild(heicBadge);
+        }
+        
         // Observar la imagen para lazy loading
         observer.observe(img);
         
@@ -581,24 +647,38 @@
         
         // Evento para abrir el modal
         galleryItem.addEventListener('click', () => {
-            // Mostrar modal inmediatamente con la miniatura
-            modalImage.src = img.src;
+            // Mostrar modal con spinner mientras se carga
+            modalImage.src = '';
+            modalImage.classList.remove('loaded');
             modalMessage.textContent = item.mensaje || '';
             imageModal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
             
-            // Cargar la imagen de alta resolución para el modal
-            const highResImg = new Image();
-            highResImg.src = item.imagen_url;
-            highResImg.onload = () => {
-                modalImage.src = item.imagen_url;
-                modalImage.classList.add('loaded');
-            };
-            
-            highResImg.onerror = () => {
-                modalImage.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200"><rect width="300" height="200" fill="#f0f0f0"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#888" font-size="16">Imagen no disponible</text></svg>';
-                modalImage.classList.add('loaded');
-            };
+            // Si es HEIC, convertir primero
+            if (isHeic(item.imagen_url)) {
+                convertHeicToJpeg(item.imagen_url)
+                    .then(jpegUrl => {
+                        modalImage.src = jpegUrl;
+                        modalImage.classList.add('loaded');
+                    })
+                    .catch(error => {
+                        console.error('Error convirtiendo HEIC para modal:', error);
+                        modalImage.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200"><rect width="300" height="200" fill="#f0f0f0"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#888" font-size="16">Error al cargar</text></svg>';
+                        modalImage.classList.add('loaded');
+                    });
+            } else {
+                // Cargar imagen normal
+                const highResImg = new Image();
+                highResImg.src = item.imagen_url;
+                highResImg.onload = () => {
+                    modalImage.src = item.imagen_url;
+                    modalImage.classList.add('loaded');
+                };
+                highResImg.onerror = () => {
+                    modalImage.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200"><rect width="300" height="200" fill="#f0f0f0"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#888" font-size="16">Imagen no disponible</text></svg>';
+                    modalImage.classList.add('loaded');
+                };
+            }
             
             // Animación para el mensaje
             setTimeout(() => {
@@ -661,5 +741,6 @@
 </script>
 </body>
 </html>
+
 
 
