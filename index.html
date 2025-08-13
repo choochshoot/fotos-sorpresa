@@ -67,6 +67,36 @@
             flex-wrap: wrap;
         }
         
+        .stats-container {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            margin-top: 0.8rem;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 0.6rem 1.2rem;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .stat-card i {
+            font-size: 1rem;
+            color: #ffd43b;
+        }
+        
+        .stat-card span {
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+        
         .search-container {
             position: relative;
             max-width: 350px;
@@ -368,6 +398,10 @@
         
         @media (min-width: 1024px) {
             .gallery { grid-template-columns: repeat(4, 1fr); }
+            .controls {
+                justify-content: space-between;
+                align-items: center;
+            }
         }
         
         /* Optimizaciones de rendimiento */
@@ -403,15 +437,24 @@
 <body>
 <header>
     <div class="header-content">
-        <h1>FOTOS PARA SOPRESA DE INVITADOS</h1>
+        <h1>FOTOS PARA SOPRESA PARA INVITADOS</h1>
         <p class="subtitle">Una colección especial de momentos compartidos por nuestros invitados</p>
         <div class="controls">
             <div class="search-container">
                 <i class="fas fa-search"></i>
                 <input type="text" id="searchInput" placeholder="Buscar por nombre...">
             </div>
-            <div class="stats">
-                <i class="fas fa-images"></i> <span id="imageCount">0</span> fotos compartidas
+        </div>
+        
+        <!-- Nuevo contenedor para estadísticas -->
+        <div class="stats-container">
+            <div class="stat-card">
+                <i class="fas fa-images"></i>
+                <span>Fotos cargadas: <span id="loadedImages">0</span></span>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-database"></i>
+                <span>Total fotos compartidas: <span id="totalImages">0</span></span>
             </div>
         </div>
     </div>
@@ -463,7 +506,8 @@
     const modalImage = document.getElementById('modalImage');
     const modalMessage = document.getElementById('modalMessage');
     const searchInput = document.getElementById('searchInput');
-    const imageCount = document.getElementById('imageCount');
+    const loadedImages = document.getElementById('loadedImages');
+    const totalImages = document.getElementById('totalImages');
 
     // Variables de estado
     let currentPage = 1;
@@ -472,6 +516,24 @@
     let allDataLoaded = false;
     let imagesData = [];
     let searchTimeout = null;
+    let totalImagesCount = 0;
+
+    // Función para obtener el total de imágenes en la base de datos
+    async function getTotalImagesCount() {
+        try {
+            const { count, error } = await supabase
+                .from('mensajes')
+                .select('*', { count: 'exact', head: true });
+            
+            if (error) throw error;
+            
+            totalImagesCount = count || 0;
+            totalImages.textContent = totalImagesCount;
+        } catch (error) {
+            console.error('Error obteniendo el total de imágenes:', error);
+            totalImages.textContent = '0';
+        }
+    }
 
     // Función para convertir imágenes HEIC a JPEG
     async function convertHeicToJpeg(heicUrl) {
@@ -584,7 +646,8 @@
                 return;
             }
 
-            imageCount.textContent = count || imagesData.length + data.length;
+            // Actualizar contador de imágenes cargadas
+            loadedImages.textContent = imagesData.length + data.length;
 
             for (const item of data) {
                 if (!item.imagen_url) continue;
@@ -726,6 +789,10 @@
 
     // Cargar imágenes iniciales
     window.addEventListener('DOMContentLoaded', () => {
+        // Obtener el total de imágenes en la base de datos
+        getTotalImagesCount();
+        
+        // Cargar las imágenes
         loadImages();
     });
 
@@ -741,6 +808,7 @@
 </script>
 </body>
 </html>
+
 
 
 
